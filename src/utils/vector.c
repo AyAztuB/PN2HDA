@@ -73,3 +73,27 @@ void* vector_pop(struct vector* v) {
 bool vector_is_empty(struct vector* v) {
     return v->length == 0;
 }
+
+size_t vector_find(struct vector* v, bool (*predicate)(void* elm, void* args), void* extra_args) {
+    for(size_t i = 0; i < v->length * v->sizeof_elm; i += v->sizeof_elm) {
+        if (predicate(((char*)v->array) + i, extra_args))
+            return i / v->sizeof_elm;
+    }
+    return v->length;
+}
+
+bool vector_all(struct vector* v, bool (*predicate)(void* elm, void* args), void* extra_args) {
+    for(size_t i = 0; i < v->length * v->sizeof_elm; i += v->sizeof_elm) {
+        if (!predicate(((char*)v->array) + i, extra_args))
+            return false;
+    }
+    return true;
+}
+
+bool vector_any(struct vector* v, bool (*predicate)(void* elm, void* args), void* extra_args) {
+    for(size_t i = 0; i < v->length * v->sizeof_elm; i += v->sizeof_elm) {
+        if (predicate(((char*)v->array) + i, extra_args))
+            return true;
+    }
+    return false;
+}

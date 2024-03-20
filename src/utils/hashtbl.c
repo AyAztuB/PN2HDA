@@ -84,7 +84,38 @@ static bool hashtbl_expand(struct hashtbl* h) {
 bool hashtbl_add(struct hashtbl* h, void* key, void* value) {
     if (!hashtbl_expand(h))
         return false;
-    (void)key;
-    (void)value;
+    size_t hash = h->hash_func(key);
+    size_t h2 = hash;
+    for (; h->data[h2 % h->capacity].state == OCCUPED; h2++) {
+        if (!h->cmp_func(key, h->data[h2 % h->capacity].key))
+            return false;
+    }
+    for (size_t hh = h2; h->data[hh % h->capacity].state != FREED; hh++) {
+        if (h->data[hh % h->capacity].state == OCCUPED && !h->cmp_func(key, h->data[hh % h->capacity].key))
+            return false;
+    }
+    h->data[h2 % h->capacity] = (struct hashtbl_data){
+        .state = OCCUPED,
+        .key = key,
+        .hash_value = hash,
+        .value = value,
+    };
+    (h->nb_free_nodes)--;
     return true;
+}
+
+struct hashtbl_element hashtbl_remove(struct hashtbl* h, void* key) {
+    size_t hash = h->hash_func(key);
+    for (struct hashtbl_data d = h->data[hash % h->capacity]; d.state != FREED; d = h->data[(++hash) % h->capacity]) {
+        if (d.state == OCCUPED && !h->cmp_func(key, d.key)) {
+            (h->nb_free_nodes)++;
+            h->data[hash % h->capacity].state = DELETED;
+            return (struct hashtbl_element){
+                .key = d.key, .value = d.value,
+            };
+        }
+    }
+    return (struct hashtbl_element){
+        .key = NULL, .value = NULL,
+    };
 }
