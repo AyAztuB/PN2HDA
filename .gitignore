@@ -1,0 +1,10 @@
+/build/
+*.o
+*.so
+*.a
+*.out
+*.in
+*.*cache*
+compile_commands.json
+*.swp
+*.~
