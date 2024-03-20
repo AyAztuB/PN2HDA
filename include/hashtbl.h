@@ -29,7 +29,14 @@ struct hashtbl_creation_args {
 
 size_t hashtbl_default_cmpfunc(const void* key1, const void* key2);
 size_t hashtbl_default_hashfunc(const void* key);
+
 struct hashtbl* hashtbl_new(size_t sizeof_key, size_t sizeof_value, struct hashtbl_creation_args* extra_args);
 bool hashtbl_add(struct hashtbl* h, void* key, void* value);
+struct hashtbl_element hashtbl_remove(struct hashtbl* h, void* key);
+struct hashtbl_element hashtbl_find(struct hashtbl* h, void* key);
+struct hashtbl_element hashtbl_update(struct hashtbl* h, void* key, void* value);
+bool hashtbl_update_with_func(struct hashtbl* h, void* key, struct hashtbl_element (*update_func)(struct hashtbl_element elm, void* args), void* extra_args);
+void hashtbl_destroy(struct hashtbl* h);
+void hashtbl_forall(struct hashtbl* h, void (*func)(struct hashtbl_element elm, void* args), void* extra_args);
 
 #endif // HASHTBL_H
