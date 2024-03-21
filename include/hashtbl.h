@@ -6,13 +6,11 @@
 
 #define ERROR_PTR (void*)~0ul
 #define Hashtbl(T1, T2) struct hashtbl*
-#define HASHTBL_NEW(SIZE_KEY, SIZE_VALUE, ...) \
-do { \
-    _Pragma("GCC diagnostic push") \
-    _Pragma("GCC diagnostic ignored \"-Woverride-init\"") \
-        hashtbl_new((SIZE_KEY), (SIZE_VALUE), &(struct hashtbl_creation_args){ .capacity = 100, .hash_func = hashtbl_default_hashfunc, .cmp_func = hashtbl_default_cmpfunc, __VA_ARGS__ }); \
-    _Pragma("GCC diagnostic pop") \
-} while(0)
+#define HASHTBL_NEW(TYPE_KEY, TYPE_VALUE, ...) \
+_Pragma("GCC diagnostic push") \
+_Pragma("GCC diagnostic ignored \"-Woverride-init\"") \
+    hashtbl_new(sizeof(TYPE_KEY), sizeof(TYPE_VALUE), &(struct hashtbl_creation_args){ .capacity = 100, .hash_func = hashtbl_default_hashfunc, .cmp_func = hashtbl_default_cmpfunc, __VA_ARGS__ }); \
+_Pragma("GCC diagnostic pop")
 
 struct hashtbl;
 
