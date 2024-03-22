@@ -15,10 +15,6 @@
 #define WHITE "\033[0m"
 #define ORANGE "\033[0;38:2:220:165:0m"
 
-#define STR(A) #A
-#define CONCAT(A, B) A##B
-#define _(A, B) STR(A##B)
-
 static const char* log_level_str[] = {
 #define X(A) [A] = #A,
     LOG_LVL(X)
@@ -70,7 +66,7 @@ void logger_log(enum log_level level, const char* file_name, size_t line, const 
 #endif // __linux__
         fprintf(outfile, "%s:%zu in %s(): %s\n", file_name, line, func_name, message);
     }
-    if (logger_options.output_logs || level == FATAL) {
+    if (logger_options.output_logs || level == FATAL || level == ERROR) {
         const char* color;
         FILE* out;
         switch (level) {

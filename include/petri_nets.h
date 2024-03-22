@@ -2,6 +2,7 @@
 #define PETRI_NETS_H
 
 #include <stddef.h>
+#include <libxml/parser.h>
 
 #include "vector.h"
 
@@ -21,5 +22,6 @@ struct pn_transition* pn_transition_new(const char* label);
 void pn_transition_destroy(struct pn_transition* t);
 struct petri_net* petri_net_new(void);
 void petri_net_destroy(struct petri_net* pn);
+struct petri_net* parse_xml_file(xmlNodePtr root);
 
 #endif // PETRI_NETS_H

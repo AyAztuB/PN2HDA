@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define LOG_LVL(X) \
     X(INFO) \
@@ -21,13 +23,25 @@ enum log_level {
     #define SOURCE_PATH_SIZE 0
 #endif // SOURCE_PATH_SIZE
 #define __FILENAME__ ((__FILE__) + (SOURCE_PATH_SIZE))
-#define LOG(LEVEL, MSG) \
-    logger_log((LEVEL), __FILENAME__, __LINE__, __func__, (MSG))
+#define LOG(LEVEL, FMT, ...) \
+do { \
+    int __n = snprintf(NULL, 0, (FMT), __VA_ARGS__); \
+    if (__n < 0) { \
+        break; \
+    } \
+    size_t __size = (size_t) __n + 1; \
+    char* __buff = malloc(__size * sizeof(*__buff)); \
+    if (__buff == NULL) { \
+        break; \
+    } \
+    snprintf(__buff, __size, (FMT), __VA_ARGS__); \
+    logger_log((LEVEL), __FILENAME__, __LINE__, __func__, __buff); \
+} while(0)
 
 struct logger_options {
     bool output_logs; // output log on stdout/stderr (in addition or not of logging in file)
-    // if true, all logs INFO, and WARNING will be displayed on stdout and ERROR and TIMEOUT on stderr
-    // all log marked as FATAL will be displayed on stderr even if output_logs if set to false
+    // if true, all logs INFO, and WARNING will be displayed on stdout and TIMEOUT on stderr
+    // all log marked as FATAL or ERROR will be displayed on stderr even if output_logs if set to false
     bool show_date;
 #ifdef __linux__
     bool show_thread_id;
