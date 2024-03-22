@@ -13,6 +13,8 @@ target_include_directories(pn2hda
   PRIVATE
     "include/"
     ${LIBXML2_INCLUDE_DIRS})
+string(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_SIZE)
+add_definitions("-DSOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}")
 target_compile_options(pn2hda
   PRIVATE
     -Wall -Wextra -Werror -pedantic --std=c99 -Wvla)
