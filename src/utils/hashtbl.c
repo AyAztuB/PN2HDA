@@ -90,7 +90,7 @@ bool hashtbl_add(struct hashtbl* h, void* key, void* value) {
         if (!h->cmp_func(key, h->data[h2 % h->capacity].key))
             return false;
     }
-    for (size_t hh = h2; h->data[hh % h->capacity].state != FREED; hh++) {
+    for (size_t hh = h2, i = h2 - hash; h->data[hh % h->capacity].state != FREED && i < h->capacity; hh++, i++) {
         if (h->data[hh % h->capacity].state == OCCUPED && !h->cmp_func(key, h->data[hh % h->capacity].key))
             return false;
     }
@@ -106,7 +106,8 @@ bool hashtbl_add(struct hashtbl* h, void* key, void* value) {
 
 struct hashtbl_element hashtbl_remove(struct hashtbl* h, void* key) {
     size_t hash = h->hash_func(key);
-    for (struct hashtbl_data d = h->data[hash % h->capacity]; d.state != FREED; d = h->data[(++hash) % h->capacity]) {
+    size_t i = 0;
+    for (struct hashtbl_data d = h->data[hash % h->capacity]; d.state != FREED && i != h->capacity; d = h->data[(++hash) % h->capacity], i++) {
         if (d.state == OCCUPED && !h->cmp_func(key, d.key)) {
             (h->nb_free_nodes)++;
             h->data[hash % h->capacity].state = DELETED;
@@ -122,7 +123,8 @@ struct hashtbl_element hashtbl_remove(struct hashtbl* h, void* key) {
 
 struct hashtbl_element hashtbl_find(struct hashtbl* h, void* key) {
     size_t hash = h->hash_func(key);
-    for (struct hashtbl_data d = h->data[hash % h->capacity]; d.state != FREED; d = h->data[(++hash) % h->capacity]) {
+    size_t i = 0;
+    for (struct hashtbl_data d = h->data[hash % h->capacity]; d.state != FREED && i != h->capacity; d = h->data[(++hash) % h->capacity], i++) {
         if (d.state == OCCUPED && !h->cmp_func(key, d.key)) {
             return (struct hashtbl_element){
                 .key = d.key, .value = d.value,
@@ -150,7 +152,7 @@ struct hashtbl_element hashtbl_update(struct hashtbl* h, void* key, void* value)
             return res;
         }
     }
-    for (size_t hh = h2; h->data[hh % h->capacity].state != FREED; hh++) {
+    for (size_t hh = h2, i = h2 - hash; h->data[hh % h->capacity].state != FREED && i < h->capacity; hh++, i++) {
         if (h->data[hh % h->capacity].state == OCCUPED && !h->cmp_func(key, h->data[hh % h->capacity].key)) {
             struct hashtbl_element res = (struct hashtbl_element){
                 .key = h->data[hh % h->capacity].key,
@@ -187,7 +189,7 @@ bool hashtbl_update_with_func(struct hashtbl* h, void* key, struct hashtbl_eleme
             return true;
         }
     }
-    for (size_t hh = h2; h->data[hh % h->capacity].state != FREED; hh++) {
+    for (size_t hh = h2, i = h2 - hash; h->data[hh % h->capacity].state != FREED && i < h->capacity; hh++, i++) {
         if (h->data[hh % h->capacity].state == OCCUPED && !h->cmp_func(key, h->data[hh % h->capacity].key)) {
             struct hashtbl_element elm = update_func((struct hashtbl_element){
                     .key = h->data[hh % h->capacity].key,
