@@ -17,19 +17,60 @@
  */
 
 static void parse_place(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) places) {
-    // TODO: TO CONTINUE
-    (void) curr;
-    (void) net;
-    (void) places;
-    LOG(WARNING, "%s", "Not implemented........");
+    xmlChar* id = xmlGetProp(curr, (const xmlChar*) "id");
+    size_t val = 0;
+    for (xmlNodePtr n = curr->children; n; n = n->next) {
+        if (!xmlStrcmp(n->name, (const xmlChar*) "initialMarking")) {
+            xmlNodePtr n2 = n->children;
+            if (!n2 || xmlStrcmp(n2->name, (const xmlChar*) "text") || !n2->children) {
+                LOG(WARNING, "Invalid initialMarking in place `%s'", id);
+                continue;
+            }
+            xmlChar* valStr = xmlNodeListGetString(curr->doc, n2->children, 1);
+            char* rest = NULL;
+            long v = 0;
+            if (!valStr || (v = strtol((const char*) valStr, &rest, 10)) < 0 || (rest && *rest)) {
+                LOG(WARNING, "Invalid initialMarking in place `%s': got `%s' but expected an unsigned integer", id, valStr);
+                xmlFree(valStr);
+                continue;
+            }
+            val = v;
+            break;
+        }
+    }
+    size_t p = vector_length(net->marking);
+    vector_push(net->marking, &val);
+    if (!hashtbl_add(places, id, (void*) p))
+        LOG(ERROR, "The place `%s' cannot be added in the places hashtable...", id);
 }
 
 static void parse_transition(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) transitions) {
-    // TODO: TO CONTINUE
-    (void) curr;
-    (void) net;
-    (void) transitions;
-    LOG(WARNING, "%s", "Not implemented........");
+    xmlChar* id = xmlGetProp(curr, (const xmlChar*) "id");
+    xmlChar* name = NULL;
+    for (xmlNodePtr n = curr->children; n; n = n->next) {
+        if (!xmlStrcmp(n->name, (const xmlChar*) "name")) {
+            xmlNodePtr n2 = n->children;
+            if (!n2 || xmlStrcmp(n2->name, (const xmlChar*) "text") || !n2->children) {
+                LOG(WARNING, "Invalid name in transition `%s'", id);
+                continue;
+            }
+            name = xmlNodeListGetString(curr->doc, n2->children, 1);
+            if (!name) {
+                LOG(WARNING, "Invalid name in transition `%s': got null", id);
+                xmlFree(name);
+                name = NULL;
+                continue;
+            }
+            break;
+        }
+    }
+    size_t p = vector_length(net->transitions);
+    if (!name)
+        name = (xmlChar*) strdup((const char*) id);
+    vector_push(net->transitions, &(struct pn_transition*){ pn_transition_new((char*) name) });
+    if (!hashtbl_add(transitions, id, (void*) p))
+        LOG(ERROR, "The transition (id: `%s', name: `%s') cannot be added in the transitions hashtable...", id, name);
+    free(name);
 }
 
 static void parse_arc(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) places, Hashtbl(char*, size_t) transitions) {

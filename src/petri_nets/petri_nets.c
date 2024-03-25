@@ -56,7 +56,8 @@ struct petri_net* petri_net_new(void) {
 }
 
 static void free_pn_transition(void* t, __attribute__((unused))void* unused) {
-    pn_transition_destroy(t);
+    struct pn_transition** toto = t;
+    pn_transition_destroy(*toto);
 }
 
 void petri_net_destroy(struct petri_net* pn) {

@@ -9,7 +9,7 @@
 #define HASHTBL_NEW(OUT, TYPE_KEY, TYPE_VALUE, ...) \
 _Pragma("GCC diagnostic push") \
 _Pragma("GCC diagnostic ignored \"-Woverride-init\"") \
-    OUT = hashtbl_new(sizeof(TYPE_KEY), sizeof(TYPE_VALUE), &(struct hashtbl_creation_args){ .capacity = 100, .hash_func = hashtbl_default_hashfunc, .cmp_func = hashtbl_default_cmpfunc, __VA_ARGS__ }); \
+    OUT = hashtbl_new(sizeof(TYPE_KEY), sizeof(TYPE_VALUE), &(struct hashtbl_creation_args){ .capacity = 256, .hash_func = hashtbl_default_hashfunc, .cmp_func = hashtbl_default_cmpfunc, __VA_ARGS__ }); \
 _Pragma("GCC diagnostic pop")
 
 struct hashtbl;

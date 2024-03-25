@@ -12,7 +12,7 @@ struct vector {
 
 struct vector* vector_new(size_t sizeof_elm, size_t initial_cap) {
     if (!initial_cap)
-        initial_cap = 100;
+        initial_cap = 128;
     struct vector* v = malloc(sizeof(*v));
     if (!v) return NULL;
     v->array = malloc(sizeof_elm * initial_cap);
@@ -59,7 +59,7 @@ bool vector_resize(struct vector* v, size_t new_cap) {
 bool vector_push(struct vector* v, void* restrict elm) {
     if (v->length >= v->capacity && !vector_resize(v, 2 * v->capacity))
         return false;
-    memcpy(((char*)v->array) + v->length, elm, v->sizeof_elm);
+    memcpy(((char*)v->array) + v->length * v->sizeof_elm, elm, v->sizeof_elm);
     (v->length)++;
     return true;
 }
