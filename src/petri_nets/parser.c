@@ -18,6 +18,10 @@
 
 static void parse_place(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) places) {
     xmlChar* id = xmlGetProp(curr, (const xmlChar*) "id");
+    if (!id) {
+        LOG(ERROR, "%s", "Invalid transition: expected id attribute");
+        return;
+    }
     size_t val = 0;
     for (xmlNodePtr n = curr->children; n; n = n->next) {
         if (!xmlStrcmp(n->name, (const xmlChar*) "initialMarking")) {
@@ -46,6 +50,10 @@ static void parse_place(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, s
 
 static void parse_transition(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) transitions) {
     xmlChar* id = xmlGetProp(curr, (const xmlChar*) "id");
+    if (!id) {
+        LOG(ERROR, "%s", "Invalid transition: expected id attribute");
+        return;
+    }
     xmlChar* name = NULL;
     for (xmlNodePtr n = curr->children; n; n = n->next) {
         if (!xmlStrcmp(n->name, (const xmlChar*) "name")) {
@@ -74,12 +82,48 @@ static void parse_transition(xmlNodePtr curr, struct petri_net* net, Hashtbl(cha
 }
 
 static void parse_arc(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) places, Hashtbl(char*, size_t) transitions) {
-    // TODO: TO CONTINUE
-    (void) curr;
-    (void) net;
-    (void) places;
-    (void) transitions;
-    LOG(WARNING, "%s", "Not implemented........");
+    xmlChar* id = xmlGetProp(curr, (const xmlChar*) "id");
+    xmlChar* source = xmlGetProp(curr, (const xmlChar*) "source");
+    xmlChar* target = xmlGetProp(curr, (const xmlChar*) "target");
+    if (!id || !source || !target) {
+        LOG(ERROR, "%s", "Invalid transition: expected id, source and target attributes");
+        xmlFree(id);
+        xmlFree(source);
+        xmlFree(target);
+        return;
+    }
+    for (xmlNodePtr n = curr->children; n; n = n->next) {
+        if (!xmlStrcmp(n->name, (const xmlChar*) "inscription")) {
+            LOG(WARNING, "Inscription found in arc `%s': inscriptions are ignored...", id);
+        }
+    }
+    bool isFromPlace = true;
+    struct hashtbl_element s = hashtbl_find(places, source);
+    if (s.key == NULL && s.value == NULL) {
+        isFromPlace = false;
+        s = hashtbl_find(transitions, source);
+    }
+    struct hashtbl_element t;
+    if (isFromPlace)
+        t = hashtbl_find(transitions, target);
+    else
+        t = hashtbl_find(places, target);
+    if ((s.key == NULL && s.value == NULL) || (t.key == NULL && t.value == NULL)) {
+        LOG(ERROR, "Unable to find source or target of arc `%s'", id);
+        xmlFree(id);
+        xmlFree(source);
+        xmlFree(target);
+        return;
+    }
+    if (isFromPlace) {
+        vector_push(((struct pn_transition**) vector_to_array(net->transitions))[(size_t) t.value]->preset, &(size_t){ (size_t) s.value });
+    }
+    else {
+        vector_push(((struct pn_transition**) vector_to_array(net->transitions))[(size_t) s.value]->postset, &(size_t){ (size_t) t.value });
+    }
+    xmlFree(id);
+    xmlFree(source);
+    xmlFree(target);
 }
 
 static struct petri_net* parse_petri_net(xmlNodePtr curr, struct petri_net* out, Hashtbl(char*, size_t) places, Hashtbl(char*, size_t) transitions) {
