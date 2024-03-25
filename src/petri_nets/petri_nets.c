@@ -11,13 +11,13 @@ struct pn_transition* pn_transition_new(const char* label) {
         free(t);
         return NULL;
     }
-    t->preset = vector_new(sizeof(size_t), 10);
+    t->preset = vector_new(sizeof(size_t), 16);
     if (!t->preset) {
         free(t->label);
         free(t);
         return NULL;
     }
-    t->postset = vector_new(sizeof(size_t), 10);
+    t->postset = vector_new(sizeof(size_t), 16);
     if (!t->postset) {
         vector_destroy(t->preset);
         free(t->label);
