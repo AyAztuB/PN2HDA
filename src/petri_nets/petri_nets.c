@@ -91,15 +91,15 @@ void pn_pretty_print(struct petri_net* pn) {
     for (size_t i = 0; i < vector_length(pn->transitions); i++) {
         printf("  transition '%s':\n    preset: ", transitions[i]->label);
         size_t* preset = vector_to_array(transitions[i]->preset);
-        for (size_t i = 0; i < vector_length(transitions[i]->preset); i++) {
-            if (i) printf(", ");
-            printf("%zu", preset[i]);
+        for (size_t k = 0; k < vector_length(transitions[i]->preset); k++) {
+            if (k) printf(", ");
+            printf("%zu", preset[k]);
         }
         printf("\n    postset: ");
         size_t* postset = vector_to_array(transitions[i]->postset);
-        for (size_t i = 0; i < vector_length(transitions[i]->postset); i++) {
-            if (i) printf(", ");
-            printf("%zu", postset[i]);
+        for (size_t k = 0; k < vector_length(transitions[i]->postset); k++) {
+            if (k) printf(", ");
+            printf("%zu", postset[k]);
         }
         printf(";\n");
     }

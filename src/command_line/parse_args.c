@@ -87,7 +87,7 @@ static void print_one_arg(void* arg, __attribute__((unused))void* unused) {
     printf("\t--%s", a->name);
     if (a->short_name)
         printf(", -%c", a->short_name);
-    printf("\t%s: %s\n", a->is_flag ? "(flag)" : "", a->description);
+    printf("\t:%s %s\n", a->is_flag ? "(flag)" : "", a->description);
 }
 
 void display_help(const char* header) {
