@@ -18,12 +18,14 @@ int main(int argc, char** argv) {
     xmlThrDefSetGenericErrorFunc(NULL, __xmlGenericErrorFunc);
 
     add_argument("help", 'h', "display help message", true, (arg_default_value){ .is_set = false });
+#ifndef NOLOG
     add_argument("logs", 0, "whether to display logs on stdout: YES|NO (default: YES)", false, (arg_default_value){ .value = "YES" });
     add_argument("log_date", 0, "whether to display date in stdout logs: YES|NO (default: NO)", false, (arg_default_value){ .value = "NO" });
 #ifdef __linux__
     add_argument("log_threads", 0, "whether to display the thread id in the stdout logs: YES|NO (default: NO)", false, (arg_default_value){ .value = "YES" });
 #endif // __linux__
     add_argument("log_file", 'f', "to specify a file to store logs (can be in addition of stdout logs)", false, (arg_default_value){ .value = NULL });
+#endif // NOLOG
     add_argument("print_pn", 0, "use the petri net pretty print", true, (arg_default_value){ .is_set = false });
 
     if (argc == 1 || !parse_command_line(argc-1, argv) || is_flag_set("help")) {
@@ -31,6 +33,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+#ifndef NOLOG
     struct logger_options l = (struct logger_options) {
         .output_logs = strcmp(get_argument_value("logs"), "YES") == 0,
         .show_date = strcmp(get_argument_value("log_date"), "YES") == 0,
@@ -44,6 +47,7 @@ int main(int argc, char** argv) {
         if (!logger_set_outfile(file_log))
             LOG(ERROR, "Unable to open log file `%s': skipping error", file_log);
     }
+#endif // NOLOG
 
     xmlDocPtr document = xmlParseFile(argv[argc-1]);
     if (!document) {
@@ -69,7 +73,9 @@ int main(int argc, char** argv) {
 
 
     free_argument_parser();
+#ifndef NOLOG
     logger_close_outfile();
+#endif // NOLOG
 
     return 0;
 }
