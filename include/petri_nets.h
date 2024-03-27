@@ -23,5 +23,6 @@ void pn_transition_destroy(struct pn_transition* t);
 struct petri_net* petri_net_new(void);
 void petri_net_destroy(struct petri_net* pn);
 struct petri_net* parse_xml_file(xmlNodePtr root);
+void pn_pretty_print(struct petri_net* pn);
 
 #endif // PETRI_NETS_H

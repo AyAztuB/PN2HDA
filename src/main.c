@@ -32,6 +32,8 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    pn_pretty_print(net);
+
     // TODO: TO CONTINUE
     LOG(WARNING, "%s", "Features not implemented...");
     petri_net_destroy(net);

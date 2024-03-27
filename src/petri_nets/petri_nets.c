@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 struct pn_transition* pn_transition_new(const char* label) {
     struct pn_transition* t = malloc(sizeof(*t));
@@ -69,4 +70,38 @@ void petri_net_destroy(struct petri_net* pn) {
         vector_destroy(pn->transitions);
     }
     free(pn);
+}
+
+void pn_pretty_print(struct petri_net* pn) {
+    printf("\nPetri Net:\n");
+    if (!pn) {
+        printf("(null)\n\n");
+        return;
+    }
+    printf("Number of places: %zu, Number of transitions: %zu\n", vector_length(pn->marking), vector_length(pn->transitions));
+    printf("Initial marking: ");
+    size_t* initial_marking = vector_to_array(pn->marking);
+    for (size_t i = 0; i < vector_length(pn->marking); i++) {
+        if (i) printf(", ");
+        printf("%zu", initial_marking[i]);
+    }
+    printf("\n");
+    printf("Arcs:\n");
+    struct pn_transition** transitions = vector_to_array(pn->transitions);
+    for (size_t i = 0; i < vector_length(pn->transitions); i++) {
+        printf("  transition '%s':\n    preset: ", transitions[i]->label);
+        size_t* preset = vector_to_array(transitions[i]->preset);
+        for (size_t i = 0; i < vector_length(transitions[i]->preset); i++) {
+            if (i) printf(", ");
+            printf("%zu", preset[i]);
+        }
+        printf("\n    postset: ");
+        size_t* postset = vector_to_array(transitions[i]->postset);
+        for (size_t i = 0; i < vector_length(transitions[i]->postset); i++) {
+            if (i) printf(", ");
+            printf("%zu", postset[i]);
+        }
+        printf(";\n");
+    }
+    printf("\n");
 }
