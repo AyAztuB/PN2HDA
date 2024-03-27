@@ -53,7 +53,7 @@ struct hashtbl* hashtbl_new(size_t sizeof_key, size_t sizeof_value, struct hasht
     h->capacity = extra_args->capacity;
     h->cmp_func = extra_args->cmp_func;
     h->hash_func = extra_args->hash_func;
-    h->nb_free_nodes = 0;
+    h->nb_free_nodes = h->capacity;
     h->sizeof_key = sizeof_key;
     h->sizeof_value = sizeof_value;
     return h;
