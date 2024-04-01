@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     add_argument("logs", 0, "whether to display logs on stdout: YES|NO (default: YES)", false, (arg_default_value){ .value = "YES" });
     add_argument("log_date", 0, "whether to display date in stdout logs: YES|NO (default: NO)", false, (arg_default_value){ .value = "NO" });
 #ifdef __linux__
-    add_argument("log_threads", 0, "whether to display the thread id in the stdout logs: YES|NO (default: NO)", false, (arg_default_value){ .value = "YES" });
+    add_argument("log_threads", 0, "whether to display the thread id in the stdout logs: YES|NO (default: NO)", false, (arg_default_value){ .value = "NO" });
 #endif // __linux__
     add_argument("log_file", 'f', "to specify a file to store logs (can be in addition of stdout logs)", false, (arg_default_value){ .value = NULL });
 #endif // NOLOG

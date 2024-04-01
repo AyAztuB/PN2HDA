@@ -12,6 +12,7 @@ struct vector* vector_new(size_t sizeof_elm, size_t initial_cap);
 void vector_destroy(struct vector* v);
 void* vector_to_array(struct vector* v);
 size_t vector_length(struct vector* v);
+size_t vector_capacity(struct vector* v);
 bool vector_is_empty(struct vector* v);
 
 // The func and predicate parameters take the pointer on the current element as it first argument
