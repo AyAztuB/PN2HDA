@@ -1,3 +1,8 @@
+/**
+ * @file vector.c
+ * @brief Function declarations for vector operations.
+ */
+
 #include "vector.h"
 
 #include <stdlib.h>
@@ -23,7 +28,7 @@ struct vector {
  * @param initial_cap Initial capacity of the vector. If 0, a default capacity of 128 will be used.
  * @return A pointer to the newly created vector struct on success, or NULL if memory allocation fails.
  *
- * @see vector_free
+ * @see vector_destroy
  */
 struct vector* vector_new(size_t sizeof_elm, size_t initial_cap) {
     if (!initial_cap)
