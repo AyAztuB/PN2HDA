@@ -1,4 +1,5 @@
 #include <string.h>
+#include <ctype.h>
 
 #include "petri_nets.h"
 #include "logger.h"
@@ -16,6 +17,12 @@
  * if inscription or reference(Place | Transition) found => generate WARNING
  */
 
+static char* skip_blank(char* str) {
+    if (!str) return str;
+    while (*str && isspace(*str)) str++;
+    return str;
+}
+
 static void parse_place(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) places) {
     xmlChar* id = xmlGetProp(curr, (const xmlChar*) "id");
     if (!id) {
@@ -26,16 +33,18 @@ static void parse_place(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, s
     for (xmlNodePtr n = curr->children; n; n = n->next) {
         if (!xmlStrcmp(n->name, (const xmlChar*) "initialMarking")) {
             xmlNodePtr n2 = n->children;
+            while (n2 && n2->type == XML_TEXT_NODE) n2 = n2->next;
             if (!n2 || xmlStrcmp(n2->name, (const xmlChar*) "text") || !n2->children) {
                 LOG(WARNING, "Invalid initialMarking in place `%s'", id);
                 continue;
             }
-            xmlChar* valStr = xmlNodeListGetString(curr->doc, n2->children, 1);
+            xmlChar* save= xmlNodeListGetString(curr->doc, n2->children, 1);
+            xmlChar* valStr = (xmlChar*) skip_blank((char*) save);
             char* rest = NULL;
             long v = 0;
-            if (!valStr || (v = strtol((const char*) valStr, &rest, 10)) < 0 || (rest && *rest)) {
+            if (!valStr || (v = strtol((const char*) valStr, &rest, 10)) < 0 || (rest && *(skip_blank(rest)))) {
                 LOG(WARNING, "Invalid initialMarking in place `%s': got `%s' but expected an unsigned integer", id, valStr);
-                xmlFree(valStr);
+                xmlFree(save);
                 continue;
             }
             val = v;
@@ -58,6 +67,7 @@ static void parse_transition(xmlNodePtr curr, struct petri_net* net, Hashtbl(cha
     for (xmlNodePtr n = curr->children; n; n = n->next) {
         if (!xmlStrcmp(n->name, (const xmlChar*) "name")) {
             xmlNodePtr n2 = n->children;
+            while (n2 && n2->type == XML_TEXT_NODE) n2 = n2->next;
             if (!n2 || xmlStrcmp(n2->name, (const xmlChar*) "text") || !n2->children) {
                 LOG(WARNING, "Invalid name in transition `%s'", id);
                 continue;
@@ -75,10 +85,13 @@ static void parse_transition(xmlNodePtr curr, struct petri_net* net, Hashtbl(cha
     size_t p = vector_length(net->transitions);
     if (!name)
         name = (xmlChar*) strdup((const char*) id);
+    xmlChar* saveName = name;
+    name = (xmlChar*)skip_blank((char*)name);
+    for (int i = xmlStrlen(name) - 1; i >= 0 && isspace(name[i]); i--) name[i] = 0;
     vector_push(net->transitions, &(struct pn_transition*){ pn_transition_new((char*) name) });
     if (!hashtbl_add(transitions, id, (void*) p))
         LOG(ERROR, "The transition (id: `%s', name: `%s') cannot be added in the transitions hashtable...", id, name);
-    free(name);
+    free(saveName);
 }
 
 static void parse_arc(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, size_t) places, Hashtbl(char*, size_t) transitions) {
