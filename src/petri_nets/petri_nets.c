@@ -105,3 +105,44 @@ void pn_pretty_print(struct petri_net* pn) {
     }
     printf("\n");
 }
+
+struct vector* marking_copy(struct vector* marking) {
+    struct vector* r = vector_new(sizeof(size_t), vector_length(marking));
+    if (r) {
+        for (size_t i = 0; i < vector_length(marking); i++)
+            vector_push(r, ((size_t*)vector_to_array(marking)) + i);
+    }
+    return r;
+}
+
+struct vector* pn_start_transition(struct vector* transitions, struct vector* marking, size_t transition_idx) {
+    if (!transitions || !marking || vector_length(transitions) <= transition_idx)
+        return NULL;
+    struct vector* r = marking_copy(marking);
+    struct vector* preset = (((struct pn_transition**)vector_to_array(transitions))[transition_idx])->preset;
+    for (size_t i = 0; i < vector_length(preset); i++) {
+        size_t k = ((size_t*)vector_to_array(preset))[i];
+        if (k >= vector_length(marking) || !((size_t*)vector_to_array(r))[i]) {
+            vector_destroy(r);
+            return NULL;
+        }
+        ((size_t*)vector_to_array(r))[i]-=1;
+    }
+    return r;
+}
+
+struct vector* pn_end_transition(struct vector* transitions, struct vector* marking, size_t transition_idx) {
+    if (!transitions || !marking || vector_length(transitions) <= transition_idx)
+        return NULL;
+    struct vector* r = marking_copy(marking);
+    struct vector* postset = (((struct pn_transition**)vector_to_array(transitions))[transition_idx])->postset;
+    for (size_t i = 0; i < vector_length(postset); i++) {
+        size_t k = ((size_t*)vector_to_array(postset))[i];
+        if (k >= vector_length(marking) || !((size_t*)vector_to_array(r))[i]) {
+            vector_destroy(r);
+            return NULL;
+        }
+        ((size_t*)vector_to_array(r))[i]+=1;
+    }
+    return r;
+}
