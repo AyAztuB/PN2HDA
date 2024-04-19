@@ -122,11 +122,11 @@ struct vector* pn_start_transition(struct vector* transitions, struct vector* ma
     struct vector* preset = (((struct pn_transition**)vector_to_array(transitions))[transition_idx])->preset;
     for (size_t i = 0; i < vector_length(preset); i++) {
         size_t k = ((size_t*)vector_to_array(preset))[i];
-        if (k >= vector_length(marking) || !((size_t*)vector_to_array(r))[i]) {
+        if (k >= vector_length(marking) || !((size_t*)vector_to_array(r))[k]) {
             vector_destroy(r);
             return NULL;
         }
-        ((size_t*)vector_to_array(r))[i]-=1;
+        ((size_t*)vector_to_array(r))[k]-=1;
     }
     return r;
 }
@@ -138,11 +138,11 @@ struct vector* pn_end_transition(struct vector* transitions, struct vector* mark
     struct vector* postset = (((struct pn_transition**)vector_to_array(transitions))[transition_idx])->postset;
     for (size_t i = 0; i < vector_length(postset); i++) {
         size_t k = ((size_t*)vector_to_array(postset))[i];
-        if (k >= vector_length(marking) || !((size_t*)vector_to_array(r))[i]) {
+        if (k >= vector_length(marking)) {
             vector_destroy(r);
             return NULL;
         }
-        ((size_t*)vector_to_array(r))[i]+=1;
+        ((size_t*)vector_to_array(r))[k]+=1;
     }
     return r;
 }
