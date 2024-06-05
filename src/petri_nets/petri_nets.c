@@ -146,3 +146,24 @@ struct vector* pn_end_transition(struct vector* transitions, struct vector* mark
     }
     return r;
 }
+
+size_t marking_hash(const void* m) {
+    const size_t* key = vector_to_array((struct vector*)m);
+    size_t l = vector_length((struct vector*)m);
+    size_t hash = l;
+    const size_t* end = key + l;
+    for(; key != end; key++) {
+        size_t x = *key;
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = ((x >> 16) ^ x) * 0x45d9f3b;
+        x = (x >> 16) ^ x;
+        hash ^= x + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    }
+    return hash;
+}
+
+bool is_same_marking(struct vector* m1, struct vector* m2) {
+    if (vector_length(m1) != vector_length(m2))
+        return false;
+    return !memcmp(vector_to_array(m1), vector_to_array(m2), vector_length(m1));
+}
