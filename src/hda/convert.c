@@ -53,8 +53,13 @@ static struct cell* _conversion(struct vector* m,
         }
         struct hashtbl_element e = hashtbl_find(hashtbl, m2);
         struct cell* c1 = e.value;
-        if (e.key == NULL || e.value == NULL)
+        if (e.key == NULL || e.value == NULL) {
             c1 = _conversion(m2, transition_stack, pn, hda, hashtbl);
+            if (!vector_push(transition_stack, &t)) {
+                LOG(FATAL, "%s", "not enough memory");
+                exit(1); // FIXME error handling
+            }
+        }
         if (!vector_push(c->d1, c1)) {
             LOG(FATAL, "%s", "not enough memory");
             exit(1); // FIXME error handling
