@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include "hda.h"
 
-static inline void __free_labels_cell(void* l, __attribute__((unused))void* unused) {
-    if (l) free(l);
+__attribute__((unused)) static inline void __free_labels_cell(void* l, __attribute__((unused))void* unused) {
+    if (l && *(char**)l) free(*(char**)l);
 }
 
 void free_cell(struct cell* c) {
@@ -11,7 +11,7 @@ void free_cell(struct cell* c) {
     if (c->d1) vector_destroy(c->d1);
     if (c->labels) {
         // not sure if copy or not for now...
-        vector_forall(c->labels, __free_labels_cell, NULL);
+        // vector_forall(c->labels, __free_labels_cell, NULL);
         vector_destroy(c->labels);
     }
     free(c);
@@ -30,7 +30,7 @@ struct cell* init_cell(size_t dim) {
 }
 
 static inline void __free_cells_hda(void* c, __attribute__((unused))void* unused) {
-    free_cell(c);
+    if (c) free_cell(*((struct cell**)c));
 }
 
 void free_hda(struct hda* hda, bool free_content) {
