@@ -206,7 +206,7 @@ bool vector_push(struct vector* v, void* restrict elm) {
 void* vector_pop(struct vector* v) {
     if (!v->length)
         return NULL;
-    return ((char*)v->array) + --(v->length);
+    return ((char*)v->array) + (--(v->length)) * v->sizeof_elm;
 }
 
 /**
