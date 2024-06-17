@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "hashtbl.h"
 #include "hda.h"
 
 __attribute__((unused)) static inline void __free_labels_cell(void* l, __attribute__((unused))void* unused) {
@@ -62,4 +63,57 @@ struct hda* init_hda(void) {
         return NULL;
     }
     return hda;
+}
+
+static size_t _cmp_cell_ptr(const void* c1, const void* c2) {
+    return c1 != c2;
+}
+
+static size_t _hash_cell_ptr(const void* key) {
+    return (size_t)key << 1;
+}
+
+static struct hashtbl* init_printer(struct hda* hda) {
+    struct hashtbl* out;
+    HASHTBL_NEW(out, void*, size_t, .hash_func = _hash_cell_ptr, .cmp_func = _cmp_cell_ptr,);
+    if (!out) return NULL;
+    struct cell** cells = vector_to_array(hda->cells);
+    for (size_t i = 0; i < vector_length(hda->cells); i++) {
+        hashtbl_add(out, cells[i], (void*)i, true);
+    }
+    return out;
+}
+
+void print_hda(struct hda* hda) {
+    struct hashtbl* nb = init_printer(hda);
+    if (!nb) return;
+    struct cell** cells = vector_to_array(hda->cells);
+    printf("cells:\n");
+    for (size_t i = 0; i < vector_length(hda->cells); i++) {
+        if (i) printf(",\n");
+        printf("%zu: dim=%zu", i, cells[i]->dim);
+        if (cells[i]->dim) {
+            printf(":\t[");
+            char** labels = vector_to_array(cells[i]->labels);
+            for (size_t k = 0; k < vector_length(cells[i]->labels); k++) {
+                if (k) printf(", ");
+                printf("%s", labels[k]);
+            }
+            printf("]; d0: [");
+            struct cell** d0 = vector_to_array(cells[i]->d0);
+            for (size_t k = 0; k < vector_length(cells[i]->d0); k++) {
+                if (k) printf(", ");
+                printf("%zu", (size_t)hashtbl_find(nb, (void*)d0[k]).value);
+            }
+            printf("]; d1: [");
+            struct cell** d1 = vector_to_array(cells[i]->d1);
+            for (size_t k = 0; k < vector_length(cells[i]->d1); k++) {
+                if (k) printf(", ");
+                printf("%zu", (size_t)hashtbl_find(nb, (void*)d1[k]).value);
+            }
+            printf("]");
+        }
+    }
+    printf("\n");
+    hashtbl_destroy(nb);
 }

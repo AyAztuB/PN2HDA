@@ -69,34 +69,7 @@ int main(int argc, char** argv) {
 
     struct hda* hda = conversion(net);
 
-    struct cell** cells = vector_to_array(hda->cells);
-    printf("cells:\n");
-    for (size_t i = 0; i < vector_length(hda->cells); i++) {
-        if (i) printf(",\n");
-        printf("%zu(%p): dim=%zu", i, (void*)(cells[i]), cells[i]->dim);
-        if (cells[i]->dim) {
-            printf(":\t[");
-            char** labels = vector_to_array(cells[i]->labels);
-            for (size_t k = 0; k < vector_length(cells[i]->labels); k++) {
-                if (k) printf(", ");
-                printf("%s", labels[k]);
-            }
-            printf("]; d0: [");
-            struct cell** d0 = vector_to_array(cells[i]->d0);
-            for (size_t k = 0; k < vector_length(cells[i]->d0); k++) {
-                if (k) printf(", ");
-                printf("%p", (void*)d0[k]);
-            }
-            printf("]; d1: [");
-            struct cell** d1 = vector_to_array(cells[i]->d1);
-            for (size_t k = 0; k < vector_length(cells[i]->d1); k++) {
-                if (k) printf(", ");
-                printf("%p", (void*)d1[k]);
-            }
-            printf("]");
-        }
-    }
-    printf("\n");
+    print_hda(hda);
 
     petri_net_destroy(net);
     free_hda(hda, true);
