@@ -25,6 +25,11 @@ struct cell* init_cell(size_t dim) {
         c->d0 = vector_new(sizeof(struct cell*), dim);
         c->d1 = vector_new(sizeof(struct cell*), dim);
         c->labels = vector_new(sizeof(char*), dim);
+    } else {
+        // d0 represent the incomming edges of our vertex and d1 the outgoing
+        // up to 2 of each
+        c->d0 = vector_new(sizeof(struct cell*), 2);
+        c->d1 = vector_new(sizeof(struct cell*), 2);
     }
     return c;
 }

@@ -98,8 +98,6 @@ int main(int argc, char** argv) {
     }
     printf("\n");
 
-    // TODO: TO CONTINUE
-    LOG(WARNING, "%s", "Features not implemented...");
     petri_net_destroy(net);
     free_hda(hda, true);
     LOG(INFO, "%s", "End of the program");

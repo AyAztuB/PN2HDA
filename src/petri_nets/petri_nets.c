@@ -131,6 +131,26 @@ struct vector* pn_start_transition(struct vector* transitions, struct vector* ma
     return r;
 }
 
+size_t pn_transition_is_activable(struct vector* transitions, struct vector* marking, size_t transition_idx) {
+    if (!transitions || !marking || vector_length(transitions) <= transition_idx)
+        return 0;
+    struct vector* copy = marking_copy(marking);
+    size_t count = 0;
+    struct vector* preset = (((struct pn_transition**)vector_to_array(transitions))[transition_idx])->preset;
+    for (;; count++) {
+        for (size_t i = 0; i < vector_length(preset); i++) {
+            size_t k = ((size_t*)vector_to_array(preset))[i];
+            if (k >= vector_length(marking) || !((size_t*)vector_to_array(copy))[k]) {
+                vector_destroy(copy);
+                return count;
+            }
+            ((size_t*)vector_to_array(copy))[k]-=1;
+        }
+    }
+    vector_destroy(copy);
+    return count;
+}
+
 struct vector* pn_end_transition(struct vector* transitions, struct vector* marking, size_t transition_idx) {
     if (!transitions || !marking || vector_length(transitions) <= transition_idx)
         return NULL;

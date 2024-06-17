@@ -81,18 +81,20 @@ static bool hashtbl_expand(struct hashtbl* h) {
     return true;
 }
 
-bool hashtbl_add(struct hashtbl* h, void* key, void* value) {
+bool hashtbl_add(struct hashtbl* h, void* key, void* value, bool is_unique) {
     if (!hashtbl_expand(h))
         return false;
     size_t hash = h->hash_func(key);
     size_t h2 = hash;
     for (; h->data[h2 % h->capacity].state == OCCUPED; h2++) {
-        if (!h->cmp_func(key, h->data[h2 % h->capacity].key))
+        if (is_unique && !h->cmp_func(key, h->data[h2 % h->capacity].key))
             return false;
     }
-    for (size_t hh = h2, i = h2 - hash; h->data[hh % h->capacity].state != FREED && i < h->capacity; hh++, i++) {
-        if (h->data[hh % h->capacity].state == OCCUPED && !h->cmp_func(key, h->data[hh % h->capacity].key))
-            return false;
+    if (is_unique) {
+        for (size_t hh = h2, i = h2 - hash; h->data[hh % h->capacity].state != FREED && i < h->capacity; hh++, i++) {
+            if (h->data[hh % h->capacity].state == OCCUPED && !h->cmp_func(key, h->data[hh % h->capacity].key))
+                return false;
+        }
     }
     h->data[h2 % h->capacity] = (struct hashtbl_data){
         .state = OCCUPED,
@@ -126,6 +128,21 @@ struct hashtbl_element hashtbl_find(struct hashtbl* h, void* key) {
     size_t i = 0;
     for (struct hashtbl_data d = h->data[hash % h->capacity]; d.state != FREED && i != h->capacity; d = h->data[(++hash) % h->capacity], i++) {
         if (d.state == OCCUPED && !h->cmp_func(key, d.key)) {
+            return (struct hashtbl_element){
+                .key = d.key, .value = d.value,
+            };
+        }
+    }
+    return (struct hashtbl_element){
+        .key = NULL, .value = NULL,
+    };
+}
+
+struct hashtbl_element hashtbl_find_filter(struct hashtbl* h, void* key, bool (*filter)(void* value, void* extra_args), void* extra_args) {
+    size_t hash = h->hash_func(key);
+    size_t i = 0;
+    for (struct hashtbl_data d = h->data[hash % h->capacity]; d.state != FREED && i != h->capacity; d = h->data[(++hash) % h->capacity], i++) {
+        if (d.state == OCCUPED && !h->cmp_func(key, d.key) && filter(d.value, extra_args)) {
             return (struct hashtbl_element){
                 .key = d.key, .value = d.value,
             };

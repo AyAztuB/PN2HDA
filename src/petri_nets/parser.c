@@ -53,7 +53,7 @@ static void parse_place(xmlNodePtr curr, struct petri_net* net, Hashtbl(char*, s
     }
     size_t p = vector_length(net->marking);
     vector_push(net->marking, &val);
-    if (!hashtbl_add(places, id, (void*) p))
+    if (!hashtbl_add(places, id, (void*) p, true))
         LOG(ERROR, "The place `%s' cannot be added in the places hashtable...", id);
 }
 
@@ -89,7 +89,7 @@ static void parse_transition(xmlNodePtr curr, struct petri_net* net, Hashtbl(cha
     name = (xmlChar*)skip_blank((char*)name);
     for (int i = xmlStrlen(name) - 1; i >= 0 && isspace(name[i]); i--) name[i] = 0;
     vector_push(net->transitions, &(struct pn_transition*){ pn_transition_new((char*) name) });
-    if (!hashtbl_add(transitions, id, (void*) p))
+    if (!hashtbl_add(transitions, id, (void*) p, true))
         LOG(ERROR, "The transition (id: `%s', name: `%s') cannot be added in the transitions hashtable...", id, name);
     free(saveName);
 }

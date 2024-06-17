@@ -25,6 +25,7 @@ void petri_net_destroy(struct petri_net* pn);
 struct petri_net* parse_xml_file(xmlNodePtr root);
 void pn_pretty_print(struct petri_net* pn);
 struct vector* marking_copy(struct vector* marking);
+size_t pn_transition_is_activable(struct vector* transitions, struct vector* marking, size_t transition_idx);
 struct vector* pn_start_transition(struct vector* transitions, struct vector* marking, size_t transition_idx);
 struct vector* pn_end_transition(struct vector* transitions, struct vector* marking, size_t transition_idx);
 size_t marking_hash(const void* m);
