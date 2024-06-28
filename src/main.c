@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
     add_argument("log_file", 'f', "to specify a file to store logs (can be in addition of stdout logs)", false, (arg_default_value){ .value = NULL });
 #endif // NOLOG
     add_argument("print_pn", 0, "use the petri net pretty print", true, (arg_default_value){ .is_set = false });
+    add_argument("print_hda", 0, "print the output HDA in stdout", true, (arg_default_value){ .is_set = false });
+    add_argument("output", 'o', "output file to store the HDA", false, (arg_default_value){ .value = "out.hda" });
 
     if (argc == 1 || !parse_command_line(argc-1, argv) || is_flag_set("help")) {
         internal_help(argv[0]);
@@ -70,7 +72,19 @@ int main(int argc, char** argv) {
     struct hda* hda = conversion(net);
     LOG(INFO, "%s", "Conversion algorithm finished");
 
-    print_hda(hda);
+    if (is_flag_set("print_hda"))
+        print_hda(hda, stdout);
+
+    const char* outFile = get_argument_value("output");
+    if (outFile) {
+        FILE* out = fopen(outFile, "w");
+        if (!out) {
+            LOG(ERROR, "Cannot open output file `%s'", outFile);
+        } else {
+            print_hda(hda, out);
+            fclose(out);
+        }
+    }
 
     petri_net_destroy(net);
     free_hda(hda, true);

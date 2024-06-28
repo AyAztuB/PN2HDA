@@ -33,7 +33,7 @@ void free_cell(struct cell* c);
 struct cell* init_cell(size_t dim);
 void free_hda(struct hda* hda, bool free_content);
 struct hda* init_hda(void);
-void print_hda(struct hda* hda);
+void print_hda(struct hda* hda, FILE* out);
 
 struct hda* conversion(struct petri_net* pn);
 
