@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
         pn_pretty_print(net);
 
     struct hda* hda = conversion(net);
+    LOG(INFO, "%s", "Conversion algorithm finished");
 
     print_hda(hda);
 

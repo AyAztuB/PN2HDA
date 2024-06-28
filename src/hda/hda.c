@@ -78,8 +78,15 @@ static struct hashtbl* init_printer(struct hda* hda) {
     HASHTBL_NEW(out, void*, size_t, .hash_func = _hash_cell_ptr, .cmp_func = _cmp_cell_ptr,);
     if (!out) return NULL;
     struct cell** cells = vector_to_array(hda->cells);
-    for (size_t i = 0; i < vector_length(hda->cells); i++) {
-        hashtbl_add(out, cells[i], (void*)i, true);
+    size_t dim = 0, idx = 0;
+    while (idx < vector_length(hda->cells)) {
+        for (size_t i = 0; i < vector_length(hda->cells); i++) {
+            if (cells[i]->dim == dim) {
+                hashtbl_add(out, cells[i], (void*)idx, true);
+                idx++;
+            }
+        }
+        dim++;
     }
     return out;
 }
@@ -89,30 +96,36 @@ void print_hda(struct hda* hda) {
     if (!nb) return;
     struct cell** cells = vector_to_array(hda->cells);
     printf("cells:\n");
-    for (size_t i = 0; i < vector_length(hda->cells); i++) {
-        if (i) printf(",\n");
-        printf("%zu: dim=%zu", i, cells[i]->dim);
-        if (cells[i]->dim) {
-            printf(":\t[");
-            char** labels = vector_to_array(cells[i]->labels);
-            for (size_t k = 0; k < vector_length(cells[i]->labels); k++) {
-                if (k) printf(", ");
-                printf("%s", labels[k]);
+    size_t dim = 0, idx = 0;
+    while (idx < vector_length(hda->cells)) {
+        for (size_t i = 0; i < vector_length(hda->cells); i++) {
+            if (cells[i]->dim != dim) continue;
+            if (i) printf(",\n");
+            printf("%zu: dim=%zu", idx, dim);
+            idx++;
+            if (dim) {
+                printf(":\t[");
+                char** labels = vector_to_array(cells[i]->labels);
+                for (size_t k = 0; k < vector_length(cells[i]->labels); k++) {
+                    if (k) printf(", ");
+                    printf("%s", labels[k]);
+                }
+                printf("]; d0: [");
+                struct cell** d0 = vector_to_array(cells[i]->d0);
+                for (size_t k = 0; k < vector_length(cells[i]->d0); k++) {
+                    if (k) printf(", ");
+                    printf("%zu", (size_t)hashtbl_find(nb, (void*)d0[k]).value);
+                }
+                printf("]; d1: [");
+                struct cell** d1 = vector_to_array(cells[i]->d1);
+                for (size_t k = 0; k < vector_length(cells[i]->d1); k++) {
+                    if (k) printf(", ");
+                    printf("%zu", (size_t)hashtbl_find(nb, (void*)d1[k]).value);
+                }
+                printf("]");
             }
-            printf("]; d0: [");
-            struct cell** d0 = vector_to_array(cells[i]->d0);
-            for (size_t k = 0; k < vector_length(cells[i]->d0); k++) {
-                if (k) printf(", ");
-                printf("%zu", (size_t)hashtbl_find(nb, (void*)d0[k]).value);
-            }
-            printf("]; d1: [");
-            struct cell** d1 = vector_to_array(cells[i]->d1);
-            for (size_t k = 0; k < vector_length(cells[i]->d1); k++) {
-                if (k) printf(", ");
-                printf("%zu", (size_t)hashtbl_find(nb, (void*)d1[k]).value);
-            }
-            printf("]");
         }
+        dim++;
     }
     printf("\n");
     hashtbl_destroy(nb);
