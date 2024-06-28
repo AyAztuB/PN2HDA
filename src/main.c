@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     add_argument("print_hda", 0, "print the output HDA in stdout", true, (arg_default_value){ .is_set = false });
     add_argument("output", 'o', "output file to store the HDA", false, (arg_default_value){ .value = "out.hda" });
 
-    if (argc == 1 || !parse_command_line(argc-1, argv) || is_flag_set("help")) {
+    if (argc == 1 || !parse_command_line(argc-1, argv) || is_flag_set("help") || !strcmp(argv[argc-1], "-h") || !strcmp(argv[argc-1], "--help")) {
         internal_help(argv[0]);
         return -1;
     }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+<net id="SimpleExample" type="http://www.pnml.org/version-2009/grammar/ptnet">
+<name><text>SimpleExample</text></name>
+<page id="page">
+	<place id="p0"><initialMarking><text>1</text></initialMarking><name><text>p0</text></name></place>
+	<place id="p1"><initialMarking><text>1</text></initialMarking><name><text>p1</text></name></place>
+	<place id="p2"><name><text>p2</text></name></place>
+	<place id="p3"><name><text>p3</text></name></place>
+	<transition id="t0"><name><text>a</text></name></transition>
+	<transition id="t1"><name><text>b</text></name></transition>
+	<arc id="a0" source="p0" target="t0"/>
+	<arc id="a1" source="t0" target="p2"/>
+	<arc id="a2" source="p1" target="t1"/>
+	<arc id="a3" source="t1" target="p3"/>
+</page>
+</net>
+</pnml>
